@@ -2,8 +2,11 @@ import {
 	createText,
 	setTextString,
 	getNumCreatedTexts,
-	destroyText
-} from "skyrimPlatform";
+	destroyText,
+	setTextColor,
+	getTextColor,
+	Utility
+} from "./skyrimPlatform";
 import {
 	GetIntValue,
 	SetIntValue,
@@ -16,9 +19,9 @@ import {
 } from "@skyrim-platform/papyrus-util/StorageUtil"
 
 const WidgetToolsKey: string = '.skyrimPlatform.texts'
-
-export const CreateText = function (text: string, StringID: string, modname: string, xpos: number, ypos: number) {
-	let text_id: number = createText(xpos, ypos, text, [0, 0.5, 1, 1])
+// [0, 0.5, 1, 1]
+export const CreateText = function (text: string, StringID: string, modname: string, xpos: number, ypos: number, color: number[]) {
+	let text_id: number = createText(xpos, ypos, text, color)
 	// 'text' for createText will be used to identify that widget later
 	SetIntValue(null, `${WidgetToolsKey}.${modname}.widgets.${StringID}`, text_id)
 	IntListAdd(null, `${WidgetToolsKey}.${modname}.widgets`, text_id)
@@ -27,10 +30,13 @@ export const CreateText = function (text: string, StringID: string, modname: str
 const GetWidgetID = function (modname: string, StringID: string) {
 	return GetIntValue(null, `${WidgetToolsKey}.${modname}.widgets.${StringID}`, -1)
 }
-export const EditModText = function (text: string, modname:string, StringID: string) {
+export const EditModTextColor = function (color: number[], modname: string, StringID: string) {
+	setTextColor(GetWidgetID(modname, StringID), color)
+}
+export const EditModTextString = function (text: string, modname: string, StringID: string) {
 	setTextString(GetWidgetID(modname, StringID), text)
 }
-export const DestroyModText = function (text: string, modname:string, StringID: string) {
+export const DestroyModText = function (text: string, modname: string, StringID: string) {
 	destroyText(GetWidgetID(modname, StringID))
 }
 
@@ -39,7 +45,7 @@ export const DestroyModText = function (text: string, modname:string, StringID: 
 
 	modname: The name of the mod as a string
  */
-export const DestroyModWidgets = function (modname: string) {
+export const DestroyAllModWidgets = function (modname: string) {
 	if (IntListCount(null, `${WidgetToolsKey}.${modname}.`) == 0 || getNumCreatedTexts() == 0) {
 		return;
 	}
@@ -51,13 +57,27 @@ export const DestroyModWidgets = function (modname: string) {
 }
 
 function AddModToList(modname: string) {
-	StringListAdd(null, `${WidgetToolsKey}.ModNames.`, modname)	
+	StringListAdd(null, `${WidgetToolsKey}.ModNames.`, modname)
 }
 /**
 	Returns an array of numbers of all a mod's widgets
 
 	modname: the name of the mod as a string 
  */
-export function GetAllTexts(modname: string): number[] {
-	return IntListToArray(null, `${WidgetToolsKey}.${modname}`)	
+export function GetModAllTexts(modname: string): number[] {
+	return IntListToArray(null, `${WidgetToolsKey}.${modname}`)
+}
+
+
+export const FadeModText = function (modname: string, StringID: string, fadein: boolean) {
+	let id = GetWidgetID(modname, StringID)
+	let a = getTextColor(id)
+	if (!fadein) {
+		a[3] = 0 // set alpha to zero, making widget transparent
+	}
+	EditModTextColor(a, modname, StringID)
+}
+export const WaitFadeModText = async (modname: string, StringID: string, fadein: boolean) => {
+	await Utility.wait(1.0);
+	FadeModText(modname, StringID, fadein)
 }
