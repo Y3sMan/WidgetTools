@@ -1,0 +1,22 @@
+{
+    "name": "@skyrim-platform/widget-tools",
+    "version": "2.4.0",
+    "description": "Simple methods designed to act as a 'framework' for SP's Texts between mods.",
+    "main": "",
+    "types": "index.d.ts",
+    "license": "GPLV3",
+    "homepage": "https://github.com/Y3sMan/WidgetTools",
+    "contributors": [
+        {
+            "name": "YesMan",
+            "email": "codmaniac89@gmail.com",
+            "url": "https://github.com/Y3sMan"
+        }
+    ],
+    "devDependencies": {
+        "tsc": "^2.0.3",
+        "typescript": "^4.5.4"
+    },
+    "files": ["WidgetTools.ts"],
+    "keywords": ["skyrim", "skyrim platform"]
+}
