@@ -6,7 +6,7 @@ import {
 	setTextColor,
 	getTextColor,
 	Utility
-} from "./skyrimPlatform";
+} from "skyrimPlatform";
 import {
 	GetIntValue,
 	SetIntValue,
@@ -22,12 +22,12 @@ const WidgetToolsKey: string = '.skyrimPlatform.texts'
 // [0, 0.5, 1, 1]
 export const CreateText = function (text: string, StringID: string, modname: string, xpos: number, ypos: number, color: number[]) {
 	let text_id: number = createText(xpos, ypos, text, color)
-	// 'text' for createText will be used to identify that widget later
 	SetIntValue(null, `${WidgetToolsKey}.${modname}.widgets.${StringID}`, text_id)
 	IntListAdd(null, `${WidgetToolsKey}.${modname}.widgets`, text_id)
 	AddModToList(modname)
+	return text_id
 }
-const GetWidgetID = function (modname: string, StringID: string) {
+export const GetWidgetID = function (modname: string, StringID: string) {
 	return GetIntValue(null, `${WidgetToolsKey}.${modname}.widgets.${StringID}`, -1)
 }
 export const EditModTextColor = function (color: number[], modname: string, StringID: string) {
@@ -75,9 +75,28 @@ export const FadeModText = function (modname: string, StringID: string, fadein: 
 	if (!fadein) {
 		a[3] = 0 // set alpha to zero, making widget transparent
 	}
+	else {
+		a[3] = 0
+	}
 	EditModTextColor(a, modname, StringID)
 }
-export const WaitFadeModText = async (modname: string, StringID: string, fadein: boolean) => {
-	await Utility.wait(1.0);
+export const WaitFadeModText = async (modname: string, StringID: string, fadein: boolean, time: number) => {
+	await Utility.wait(time);
 	FadeModText(modname, StringID, fadein)
+}
+export const FadeAllModTexts = function (modname: string, fadein: boolean) {
+	const FadeTextInt = function (modname: string, id: number, fadein: boolean) {
+		let a = getTextColor(id)
+		if (!fadein) {
+			a[3] = 0 // set alpha to zero, making widget transparent
+		}
+		setTextColor(id, a)
+	}
+	if (IntListCount(null, `${WidgetToolsKey}.${modname}.`) == 0 || getNumCreatedTexts() == 0) {
+		return;
+	}
+	let alltexts = IntListToArray(null, `${WidgetToolsKey}.${modname}.`)
+	alltexts.forEach(id => {
+		FadeTextInt(modname, id, fadein)
+	});
 }
